@@ -130,10 +130,11 @@ inline void rysujPasekStanu(int nr, int ile, const char* kodek, uint32_t bitrate
 }
 
 // ---------- Nazwa stacji ----------
-inline void rysujNazweStacji(const String& nazwa) {
+// kolor: żółty = grająca stacja, biały = stacja wybierana enkoderem
+inline void rysujNazweStacji(const String& nazwa, uint16_t kolor = kol::zolty) {
   tft.fillRect(0, Y_STACJA, E_W, H_STACJA, TFT_BLACK);
   tft.setFont(&fonts::FreeSansBold12pt7b);
-  tft.setTextColor(kol::zolty);
+  tft.setTextColor(kolor);
   tft.setTextDatum(middle_left);
   tft.setClipRect(8, Y_STACJA, E_W - 16, H_STACJA);
   tft.drawString(bezOgonkow(nazwa), 8, Y_STACJA + H_STACJA / 2);
@@ -228,14 +229,17 @@ inline void rysujWidmo() {
 }
 
 // ---------- Pasek głośności / jasności ----------
-inline void rysujPasekGlosnosci(int wartosc, int maks, bool trybJasnosci) {
+// aktywny = enkoder steruje teraz tym paskiem (biała ramka)
+inline void rysujPasekGlosnosci(int wartosc, int maks, bool trybJasnosci, bool aktywny = false) {
   tft.fillRect(0, Y_GLOS, E_W, H_GLOS, TFT_BLACK);
   uint16_t c = trybJasnosci ? kol::zolty : kol::zielonyVol;
   if (trybJasnosci) ikonaSlonce(8, Y_GLOS + 3, c);
   else              ikonaGlosnik(10, Y_GLOS + 3, c);
 
   const int x0 = 32, w = 236;
-  tft.drawRect(x0, Y_GLOS + 4, w, 12, kol::szary);
+  uint16_t ramka = aktywny ? TFT_WHITE : kol::szary;
+  tft.drawRect(x0, Y_GLOS + 4, w, 12, ramka);
+  if (aktywny) tft.drawRect(x0 - 1, Y_GLOS + 3, w + 2, 14, ramka);
   int wyp = (w - 4) * constrain(wartosc, 0, maks) / maks;
   tft.fillRect(x0 + 2, Y_GLOS + 6, wyp, 8, c);
 

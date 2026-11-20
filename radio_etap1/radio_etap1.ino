@@ -61,8 +61,11 @@ bool odswiezGlos      = true;
 bool odswiezStan      = true;
 bool odswiezPrzyciski = false;
 
-bool     trybJasnosci = false;   // enkoder: false = głośność, true = jasność
-uint32_t tEnkoder     = 0;
+enum TrybEnkodera { TRYB_STACJE, TRYB_GLOSNOSC, TRYB_JASNOSC };
+TrybEnkodera trybEnk       = TRYB_STACJE;
+uint32_t tEnkoder          = 0;
+int      wybieranaStacja   = -1;   // -1 = nie przewijamy listy
+uint32_t tWyboru           = 0;
 
 // ---------- Callback biblioteki audio (wywoływany z audio.loop()) ----------
 void my_audio_info(Audio::msg_t m) {
@@ -124,31 +127,62 @@ void obsluzDotyk() {
 }
 
 // Enkoder:
-//   obrót                 - głośność (w trybie jasności: jasność)
-//   krótkie naciśnięcie   - następna stacja (w trybie jasności: powrót do głośności)
-//   długie naciśnięcie    - włącz/wyłącz tryb jasności (sam wraca po 5 s bezczynności)
+//   obrót                    - wybór stacji (zatwierdzana po chwili bez ruchu albo kliknięciem)
+//   krótkie naciśnięcie      - tryb głośności: obrót zmienia głośność
+//   długie naciśnięcie (1 s) - tryb jasności:  obrót zmienia jasność
+//   w trybie głośności/jasności: kliknięcie albo 5 s bez ruchu = powrót do wyboru stacji
+const uint32_t OPOZNIENIE_WYBORU = 700;    // ms bez kręcenia -> włącz wybraną stację
+const uint32_t POWROT_TRYBU      = 5000;   // ms bez kręcenia -> powrót do wyboru stacji
+
+void ustawTryb(int t) {
+  trybEnk  = (TrybEnkodera)t;
+  tEnkoder = millis();
+  odswiezGlos = true;
+}
+
 void obsluzEnkoder() {
   int k = enkoderKroki();
   if (k) {
     tEnkoder = millis();
-    if (trybJasnosci) { ustawJasnosc(constrain(blJasnosc + k * 15, 10, 255)); odswiezGlos = true; }
-    else              ustawGlosnosc(glosnosc + k);
+    switch (trybEnk) {
+      case TRYB_STACJE:
+        if (wybieranaStacja < 0) wybieranaStacja = stacja;
+        wybieranaStacja = ((wybieranaStacja + k) % LICZBA_STACJI + LICZBA_STACJI) % LICZBA_STACJI;
+        tWyboru = millis();
+        rysujNazweStacji(STACJE[wybieranaStacja].nazwa, TFT_WHITE);   // podgląd na biało
+        odswiezStan = true;                                           // numer na pasku stanu
+        break;
+      case TRYB_GLOSNOSC:
+        ustawGlosnosc(glosnosc + k);
+        break;
+      case TRYB_JASNOSC:
+        ustawJasnosc(constrain(blJasnosc + k * 15, 10, 255));
+        odswiezGlos = true;
+        break;
+    }
+  }
+
+  // Zatwierdzenie wybranej stacji po chwili bez kręcenia
+  if (wybieranaStacja >= 0 && millis() - tWyboru > OPOZNIENIE_WYBORU) {
+    int s = wybieranaStacja;
+    wybieranaStacja = -1;
+    if (s != stacja) grajStacje(s);
+    else { odswiezStacje = true; odswiezStan = true; }   // wrócono do tej samej
   }
 
   switch (enkoderPrzycisk()) {
     case PRZ_KROTKO:
-      if (trybJasnosci) { trybJasnosci = false; odswiezGlos = true; }
-      else              grajStacje(stacja + 1);
+      if (wybieranaStacja >= 0)          tWyboru = 0;                 // kliknięcie = włącz od razu
+      else if (trybEnk == TRYB_STACJE)   ustawTryb(TRYB_GLOSNOSC);
+      else                               ustawTryb(TRYB_STACJE);
       break;
     case PRZ_DLUGO:
-      trybJasnosci = !trybJasnosci;
-      tEnkoder = millis();
-      odswiezGlos = true;
+      ustawTryb(trybEnk == TRYB_JASNOSC ? TRYB_STACJE : TRYB_JASNOSC);
       break;
     default: break;
   }
 
-  if (trybJasnosci && millis() - tEnkoder > 5000) { trybJasnosci = false; odswiezGlos = true; }
+  if (trybEnk != TRYB_STACJE && millis() - tEnkoder > POWROT_TRYBU) ustawTryb(TRYB_STACJE);
 }
 
 void obsluzSerial() {   // + / - głośność, n / p stacja, [ / ] jasność, spacja pauza
@@ -168,8 +202,8 @@ void odswiezEkran() {
   if (odswiezTytul)  { odswiezTytul  = false; ustawTytul(tytul); }
   if (odswiezGlos) {
     odswiezGlos = false;
-    if (trybJasnosci) rysujPasekGlosnosci(blJasnosc, 255, true);
-    else              rysujPasekGlosnosci(glosnosc, 21, false);
+    if (trybEnk == TRYB_JASNOSC) rysujPasekGlosnosci(blJasnosc, 255, true, true);
+    else                         rysujPasekGlosnosci(glosnosc, 21, false, trybEnk == TRYB_GLOSNOSC);
   }
   if (odswiezPrzyciski) { odswiezPrzyciski = false; rysujPrzycisk(2, pauza); }
 
@@ -177,7 +211,7 @@ void odswiezEkran() {
   if (odswiezStan || millis() - tStan > 1000) {
     odswiezStan = false;
     tStan = millis();
-    rysujPasekStanu(stacja, LICZBA_STACJI, audio.getCodecname(), audio.getBitRate(), pauza);
+    rysujPasekStanu(wybieranaStacja >= 0 ? wybieranaStacja : stacja, LICZBA_STACJI, audio.getCodecname(), audio.getBitRate(), pauza);
   }
 
   animujTytul();
