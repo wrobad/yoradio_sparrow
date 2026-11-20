@@ -13,9 +13,15 @@
 #include "podswietlenie.h"
 #include "enkoder.h"
 
+// Dane Wi-Fi są w pliku sekrety.h (nie trafia na GitHuba).
+// Pierwszy raz: skopiuj sekrety_przyklad.h jako sekrety.h i wpisz swoje dane.
+#if __has_include("sekrety.h")
+  #include "sekrety.h"
+#else
+  #error "Brak pliku sekrety.h - skopiuj sekrety_przyklad.h jako sekrety.h i wpisz dane Wi-Fi"
+#endif
+
 // ---------- USTAW SWOJE ----------
-const char* WIFI_SSID = "TwojaSiec";
-const char* WIFI_PASS = "TwojeHaslo";
 
 // Stacje testowe - podmień/dopisz własne
 const char* STACJE[] = {

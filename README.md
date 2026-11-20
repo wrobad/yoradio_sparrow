@@ -24,6 +24,10 @@ PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
 - `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe; podświetlenie PWM na GPIO 8 (`podswietlenie.h`), enkoder (`enkoder.h`): obrót = głośność, klik = następna stacja, długie naciśnięcie = tryb jasności
 
+## Pierwsze uruchomienie – dane Wi-Fi
+W folderze `radio_etap1` skopiuj `sekrety_przyklad.h` jako **`sekrety.h`** i wpisz w nim nazwę i hasło sieci.
+Plik `sekrety.h` jest w `.gitignore`, więc hasło nigdy nie trafi do repozytorium.
+
 ## Biblioteki
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)
 - [ESP32-audioI2S](https://github.com/schreibfaul1/ESP32-audioI2S) (najnowsza wersja)

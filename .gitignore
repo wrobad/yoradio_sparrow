@@ -1,0 +1,7 @@
+# Dane dostępowe - nigdy nie wysyłamy na GitHuba
+sekrety.h
+**/sekrety.h
+
+# Pliki budowania
+build/
+*.bin
