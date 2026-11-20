@@ -15,14 +15,14 @@ Autorskie radio internetowe na ESP32-S3 (w stylu yoRadio).
 | TFT CS / DC / RESET / LED | 10 / 9 / 14 / 8 |
 | Dotyk T_CS | 4 |
 | SD_CS (planowane) | 21 |
-| Enkoder A / B / SW (planowane) | 15 / 16 / 17 |
+| Enkoder CLK / DT / SW (np. KY-040, zasilanie 3V3) | 15 / 16 / 17 |
 | IR (planowane) | 18 |
 
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
-- `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe; podświetlenie PWM na GPIO 8 (`podswietlenie.h`)
+- `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe; podświetlenie PWM na GPIO 8 (`podswietlenie.h`), enkoder (`enkoder.h`): obrót = głośność, klik = następna stacja, długie naciśnięcie = tryb jasności
 
 ## Biblioteki
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)

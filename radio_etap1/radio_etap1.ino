@@ -11,6 +11,7 @@
 #include "Audio.h"
 #include "lgfx_config.h"
 #include "podswietlenie.h"
+#include "enkoder.h"
 
 // ---------- USTAW SWOJE ----------
 const char* WIFI_SSID = "TwojaSiec";
@@ -45,6 +46,9 @@ String tytul       = "";
 volatile bool odswiezStacje = true;
 volatile bool odswiezTytul  = true;
 volatile bool odswiezGlos   = true;
+
+bool     trybJasnosci = false;   // enkoder: false = głośność, true = jasność
+uint32_t tEnkoder     = 0;
 
 // ---------- Callback biblioteki audio ----------
 void my_audio_info(Audio::msg_t m) {
@@ -99,16 +103,27 @@ void rysujTekst(int y, int h, const String& txt, const lgfx::IFont* font, uint16
   tft.setTextWrap(false);
 }
 
-void rysujGlosnosc() {
+void rysujGlosnosc() {   // pasek głośności albo jasności (tryb enkodera)
   tft.fillRect(0, Y_GLOS, tft.width(), 24, TFT_BLACK);
   int maxW = tft.width() - 80;
-  int w = map(glosnosc, 0, 21, 0, maxW);
+  int w;
+  uint16_t kolor;
+  String opis;
+  if (trybJasnosci) {
+    w = map(blJasnosc, 0, 255, 0, maxW);
+    kolor = TFT_YELLOW;
+    opis = "Jasn " + String(blJasnosc * 100 / 255) + "%";
+  } else {
+    w = map(glosnosc, 0, 21, 0, maxW);
+    kolor = TFT_GREEN;
+    opis = "Vol " + String(glosnosc);
+  }
   tft.drawRect(8, Y_GLOS + 4, maxW, 14, TFT_DARKGREY);
-  tft.fillRect(8, Y_GLOS + 4, w, 14, TFT_GREEN);
+  tft.fillRect(8, Y_GLOS + 4, w, 14, kolor);
   tft.setFont(&fonts::Font2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextDatum(top_left);
-  tft.drawString("Vol " + String(glosnosc), maxW + 16, Y_GLOS + 4);
+  tft.drawString(opis, maxW + 16, Y_GLOS + 4);
 }
 
 // ---------- Sterowanie ----------
@@ -144,6 +159,34 @@ void obsluzDotyk() {
   }
 }
 
+// Enkoder:
+//   obrót                 - głośność (w trybie jasności: jasność)
+//   krótkie naciśnięcie   - następna stacja (w trybie jasności: powrót do głośności)
+//   długie naciśnięcie    - włącz/wyłącz tryb jasności (sam wraca po 5 s bezczynności)
+void obsluzEnkoder() {
+  int k = enkoderKroki();
+  if (k) {
+    tEnkoder = millis();
+    if (trybJasnosci) { ustawJasnosc(constrain(blJasnosc + k * 15, 10, 255)); odswiezGlos = true; }
+    else              ustawGlosnosc(glosnosc + k);
+  }
+
+  switch (enkoderPrzycisk()) {
+    case PRZ_KROTKO:
+      if (trybJasnosci) { trybJasnosci = false; odswiezGlos = true; }
+      else              grajStacje(stacja + 1);
+      break;
+    case PRZ_DLUGO:
+      trybJasnosci = !trybJasnosci;
+      tEnkoder = millis();
+      odswiezGlos = true;
+      break;
+    default: break;
+  }
+
+  if (trybJasnosci && millis() - tEnkoder > 5000) { trybJasnosci = false; odswiezGlos = true; }
+}
+
 void obsluzSerial() {   // + / - głośność, n / p stacja, [ / ] jasność
   if (!Serial.available()) return;
   char c = Serial.read();
@@ -164,6 +207,7 @@ void setup() {
   tft.init();
   tft.setRotation(1);       // poziomo 320x240
   startPodswietlenia(200);   // 0..255
+  startEnkodera();
 
   bool brakKalibracji = true;
   for (int i = 0; i < 8; i++) if (KALIBRACJA[i]) brakKalibracji = false;
@@ -203,6 +247,7 @@ void loop() {
   if (odswiezGlos)   { odswiezGlos   = false; rysujGlosnosc(); }
 
   obsluzDotyk();
+  obsluzEnkoder();
   obsluzSerial();
 
   // Automatyczne ponowne łączenie po zerwaniu Wi-Fi
