@@ -26,10 +26,12 @@
 // ---------- USTAW SWOJE ----------
 struct Stacja { const char* nazwa; const char* url; };
 
-const Stacja STACJE[] = {
-  {"Radio Swiss Jazz",    "http://stream.srg-ssr.ch/m/rsj/mp3_128"},
-  {"Radio Swiss Classic", "http://stream.srg-ssr.ch/m/rsc_de/mp3_128"},
-};
+// Lista stacji jest w osobnym pliku stacje.h (Twoja) albo stacje_przyklad.h (wzór).
+#if __has_include("stacje.h")
+  #include "stacje.h"
+#else
+  #include "stacje_przyklad.h"
+#endif
 const int LICZBA_STACJI = sizeof(STACJE) / sizeof(STACJE[0]);
 
 // Wklej tu wynik "Kalibracja: {...}" z Serial Monitora.

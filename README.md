@@ -28,6 +28,11 @@ PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 W folderze `radio_etap1` skopiuj `sekrety_przyklad.h` jako **`sekrety.h`** i wpisz w nim nazwę i hasło sieci.
 Plik `sekrety.h` jest w `.gitignore`, więc hasło nigdy nie trafi do repozytorium.
 
+## Lista stacji
+Stacje dopisujesz w pliku **`stacje.h`** w folderze `radio_etap1` (na start skopiuj `stacje_przyklad.h` jako `stacje.h`).
+Jedna linia = jedna stacja: `{"Nazwa", "http://adres.strumienia"},`
+Plik `stacje.h` jest w `.gitignore`, więc aktualizacje z GitHuba go nie nadpiszą. Bez niego radio użyje listy przykładowej.
+
 ## Biblioteki
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)
 - [ESP32-audioI2S](https://github.com/schreibfaul1/ESP32-audioI2S) (najnowsza wersja)

@@ -5,3 +5,7 @@ sekrety.h
 # Pliki budowania
 build/
 *.bin
+
+# Własna lista stacji
+stacje.h
+**/stacje.h
