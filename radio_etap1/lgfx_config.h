@@ -14,7 +14,6 @@
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_ILI9341 _panel;
   lgfx::Bus_SPI       _bus;
-  lgfx::Light_PWM     _light;
   lgfx::Touch_XPT2046 _touch;
 
 public:
@@ -49,15 +48,8 @@ public:
       cfg.bus_shared = true;
       _panel.config(cfg);
     }
-    {
-      auto cfg = _light.config();
-      cfg.pin_bl = PIN_TFT_BL;
-      cfg.invert = false;
-      cfg.freq   = 44100;
-      cfg.pwm_channel = 7;
-      _light.config(cfg);
-      _panel.setLight(&_light);
-    }
+    // Podświetlenie NIE jest sterowane przez LovyanGFX (Light_PWM nie działa
+    // z rdzeniem ESP32 4.x) - obsługuje je podswietlenie.h.
     {
       auto cfg = _touch.config();
       cfg.x_min = 0;  cfg.x_max = 239;

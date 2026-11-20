@@ -17,7 +17,6 @@
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_ILI9341 _panel;
   lgfx::Bus_SPI       _bus;
-  lgfx::Light_PWM     _light;
   lgfx::Touch_XPT2046 _touch;
 
 public:
@@ -53,15 +52,6 @@ public:
       cfg.bus_shared = true;   // szyna współdzielona z dotykiem i SD
       _panel.config(cfg);
     }
-    { // Podświetlenie
-      auto cfg = _light.config();
-      cfg.pin_bl = PIN_TFT_BL;
-      cfg.invert = false;
-      cfg.freq   = 44100;
-      cfg.pwm_channel = 7;
-      _light.config(cfg);
-      _panel.setLight(&_light);
-    }
     { // Dotyk
       auto cfg = _touch.config();
       cfg.x_min = 0;   cfg.x_max = 239;   // nadpisze to kalibracja
@@ -90,7 +80,8 @@ void setup() {
 
   tft.init();
   tft.setRotation(1);      // poziomo 320x240
-  tft.setBrightness(200);  // 0-255
+  pinMode(PIN_TFT_BL, OUTPUT);       // podświetlenie wł. (bez PWM)
+  digitalWrite(PIN_TFT_BL, HIGH);
 
   // --- Kalibracja dotyku: dotknij kolejno wskazanych rogów ---
   tft.fillScreen(TFT_BLACK);

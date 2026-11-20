@@ -22,7 +22,7 @@ PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
-- `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe
+- `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe; podświetlenie PWM na GPIO 8 (`podswietlenie.h`)
 
 ## Biblioteki
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)

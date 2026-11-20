@@ -10,6 +10,7 @@
 #include <WiFi.h>
 #include "Audio.h"
 #include "lgfx_config.h"
+#include "podswietlenie.h"
 
 // ---------- USTAW SWOJE ----------
 const char* WIFI_SSID = "TwojaSiec";
@@ -143,9 +144,11 @@ void obsluzDotyk() {
   }
 }
 
-void obsluzSerial() {   // + / - głośność, n / p stacja
+void obsluzSerial() {   // + / - głośność, n / p stacja, [ / ] jasność
   if (!Serial.available()) return;
   char c = Serial.read();
+  if (c == '[') { ustawJasnosc(blJasnosc - 25); Serial.printf("Jasnosc: %d\n", blJasnosc); }
+  if (c == ']') { ustawJasnosc(blJasnosc + 25); Serial.printf("Jasnosc: %d\n", blJasnosc); }
   if (c == '+') ustawGlosnosc(glosnosc + 1);
   if (c == '-') ustawGlosnosc(glosnosc - 1);
   if (c == 'n') grajStacje(stacja + 1);
@@ -160,7 +163,7 @@ void setup() {
 
   tft.init();
   tft.setRotation(1);       // poziomo 320x240
-  tft.setBrightness(200);
+  startPodswietlenia(200);   // 0..255
 
   bool brakKalibracji = true;
   for (int i = 0; i < 8; i++) if (KALIBRACJA[i]) brakKalibracji = false;
