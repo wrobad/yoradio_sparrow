@@ -22,7 +22,7 @@ PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
-- `radio_etap1/` – etap 1: Wi-Fi, odtwarzanie strumienia, ekran ze stacją, tytułem i głośnością, przyciski dotykowe; podświetlenie PWM na GPIO 8 (`podswietlenie.h`), enkoder (`enkoder.h`): obrót = głośność, klik = następna stacja, długie naciśnięcie = tryb jasności
+- `radio_etap1/` – radio: Wi-Fi, odtwarzanie strumienia, ekran z paskiem stanu (zegar NTP, format/bitrate, numer stacji, sygnał Wi-Fi), nazwą stacji, przewijanym tytułem, analizatorem widma (15 pasm), paskiem głośności/jasności i przyciskami dotykowymi (`ekran.h`); podświetlenie PWM na GPIO 8 (`podswietlenie.h`); enkoder (`enkoder.h`): obrót = głośność, klik = następna stacja, długie naciśnięcie = tryb jasności
 
 ## Pierwsze uruchomienie – dane Wi-Fi
 W folderze `radio_etap1` skopiuj `sekrety_przyklad.h` jako **`sekrety.h`** i wpisz w nim nazwę i hasło sieci.
