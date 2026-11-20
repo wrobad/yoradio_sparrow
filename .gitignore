@@ -9,3 +9,7 @@ build/
 # Własna lista stacji
 stacje.h
 **/stacje.h
+
+# Kalibracja dotyku
+kalibracja.h
+**/kalibracja.h

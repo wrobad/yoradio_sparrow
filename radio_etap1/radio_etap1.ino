@@ -34,9 +34,14 @@ struct Stacja { const char* nazwa; const char* url; };
 #endif
 const int LICZBA_STACJI = sizeof(STACJE) / sizeof(STACJE[0]);
 
-// Wklej tu wynik "Kalibracja: {...}" z Serial Monitora.
-// Same zera = kalibracja przy każdym starcie.
-uint16_t KALIBRACJA[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+// Kalibracja dotyku jest w pliku kalibracja.h (wzór: kalibracja_przyklad.h).
+#if __has_include("kalibracja.h")
+  #include "kalibracja.h"
+#else
+  #include "kalibracja_przyklad.h"
+#endif
+
+#define WERSJA "v0.4"
 
 // Strefa czasowa Polski (zmiana czasu automatycznie)
 const char* STREFA_CZASU = "CET-1CEST,M3.5.0,M10.5.0/3";
@@ -244,16 +249,23 @@ void setup() {
   }
   tft.setTouchCalibrate(KALIBRACJA);
 
-  startEkranu();
-  rysujRamke(pauza);
-  rysujNazweStacji("Laczenie z Wi-Fi...");
-  rysujPasekGlosnosci(glosnosc, 21, false);
+  // Ekran startowy z animacją - widoczny podczas łączenia z Wi-Fi (min. 2,5 s)
+  uint32_t tStart = millis();
+  ekranStartowy(WERSJA);
+  napisStartowy("Laczenie z Wi-Fi...");
 
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);     // ważne dla płynnego strumienia
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED) { delay(300); Serial.print("."); }
-  Serial.printf("\nWi-Fi OK, IP: %s\n", WiFi.localIP().toString().c_str());
+  while (WiFi.status() != WL_CONNECTED) { klatkaStartowa(); delay(40); }
+  Serial.printf("Wi-Fi OK, IP: %s\n", WiFi.localIP().toString().c_str());
+  napisStartowy("Wi-Fi OK  " + WiFi.localIP().toString());
+  while (millis() - tStart < 2500) { klatkaStartowa(); delay(40); }
+
+  startEkranu();
+  rysujRamke(pauza);
+  rysujNazweStacji("Laczenie...");
+  rysujPasekGlosnosci(glosnosc, 21, false);
 
   configTzTime(STREFA_CZASU, "pool.ntp.org", "time.google.com");   // zegar z internetu
 

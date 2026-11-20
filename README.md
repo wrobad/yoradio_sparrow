@@ -33,6 +33,10 @@ Stacje dopisujesz w pliku **`stacje.h`** w folderze `radio_etap1` (na start skop
 Jedna linia = jedna stacja: `{"Nazwa", "http://adres.strumienia"},`
 Plik `stacje.h` jest w `.gitignore`, więc aktualizacje z GitHuba go nie nadpiszą. Bez niego radio użyje listy przykładowej.
 
+## Kalibracja dotyku
+Przy pierwszym starcie (bez pliku `kalibracja.h`) radio poprosi o dotknięcie strzałek w rogach i wypisze w Serial Monitorze linię `Kalibracja: {...}`.
+Skopiuj `kalibracja_przyklad.h` jako **`kalibracja.h`** i wpisz tam te liczby. Plik jest w `.gitignore`.
+
 ## Biblioteki
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX)
 - [ESP32-audioI2S](https://github.com/schreibfaul1/ESP32-audioI2S) (najnowsza wersja)

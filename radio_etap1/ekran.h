@@ -314,3 +314,61 @@ inline void rysujRamke(bool pauza) {
   tft.drawFastHLine(0, Y_LINIA, E_W, kol::linia);
   for (int i = 0; i < 5; i++) rysujPrzycisk(i, pauza);
 }
+
+// ---------- Ekran startowy "RADIO SPARROW SYSTEM" ----------
+const int Y_EQ_START = 152, H_EQ_START = 36, LICZBA_EQ_START = 21;
+static uint8_t eqStart[LICZBA_EQ_START];
+
+inline void ekranStartowy(const char* wersja) {
+  tft.fillScreen(TFT_BLACK);
+  tft.drawRoundRect(6, 6, E_W - 12, 228, 10, kol::niebieski);
+
+  tft.setTextDatum(middle_center);
+  tft.setFont(&fonts::FreeSansBold9pt7b);
+  tft.setTextColor(kol::jasnyNieb);
+  tft.drawString("R  A  D  I  O", E_W / 2, 46);
+  tft.drawString("S  Y  S  T  E  M", E_W / 2, 132);
+  tft.drawFastHLine(30, 46, 75, kol::niebieski);
+  tft.drawFastHLine(E_W - 105, 46, 75, kol::niebieski);
+  tft.drawFastHLine(30, 132, 60, kol::niebieski);
+  tft.drawFastHLine(E_W - 90, 132, 60, kol::niebieski);
+
+  tft.setFont(&fonts::FreeSansBold24pt7b);
+  tft.setTextColor(kol::zolty);
+  tft.drawString("SPARROW", E_W / 2, 89);
+
+  tft.setFont(&fonts::Font0);
+  tft.setTextColor(kol::szary);
+  tft.setTextDatum(bottom_right);
+  tft.drawString(wersja, E_W - 14, 226);
+
+  memset(eqStart, 0, sizeof(eqStart));
+}
+
+// Jedna klatka animowanego "korektora" pod napisem (wołać co ~40 ms)
+inline void klatkaStartowa() {
+  const int bw = 8, odst = 4;
+  const int x0 = (E_W - LICZBA_EQ_START * (bw + odst) + odst) / 2;
+  for (int i = 0; i < LICZBA_EQ_START; i++) {
+    int cel = random(4, H_EQ_START);
+    eqStart[i] = (eqStart[i] * 2 + cel) / 3;          // wygładzenie ruchu
+    int h = eqStart[i];
+    int x = x0 + i * (bw + odst);
+    tft.fillRect(x, Y_EQ_START, bw, H_EQ_START - h, TFT_BLACK);
+    for (int y = 0; y < h; y += 3) {                 // segmenty co 3 px
+      int yy = Y_EQ_START + H_EQ_START - y - 2;
+      uint16_t c = y > H_EQ_START * 75 / 100 ? kol::widmoCzer
+                 : y > H_EQ_START * 45 / 100 ? kol::widmoPom : kol::widmoZiel;
+      tft.fillRect(x, yy, bw, 2, c);
+    }
+  }
+}
+
+// Napis stanu na dole ekranu startowego
+inline void napisStartowy(const String& txt) {
+  tft.fillRect(14, 196, E_W - 80, 22, TFT_BLACK);
+  tft.setFont(&fonts::Font2);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextDatum(middle_left);
+  tft.drawString(txt, 18, 207);
+}
