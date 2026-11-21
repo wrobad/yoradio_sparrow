@@ -31,7 +31,7 @@
   #include "kalibracja_przyklad.h"
 #endif
 
-#define WERSJA "v0.5"
+#define WERSJA "v0.6"
 const char* STREFA_CZASU = "CET-1CEST,M3.5.0,M10.5.0/3";   // czas polski
 
 const uint32_t OPOZNIENIE_WYBORU       = 700;    // ms bez kręcenia -> włącz wybraną stację
@@ -46,16 +46,52 @@ const uint32_t POWROT_TRYBU      = 5000;   // ms bez kręcenia -> powrót do wyb
 Audio audio;
 LGFX  tft;
 
+// ---------- Odtwarzacz w osobnym zadaniu (rdzeń 0) ----------
+// connecttohost() potrafi blokować kilka sekund (DNS, przekierowania) -
+// w osobnym zadaniu nie zamraża ekranu, dotyku ani enkodera.
+enum { AUDIO_POLACZ = 1, AUDIO_GLOSNOSC, AUDIO_STOP };
+struct PolecenieAudio { uint8_t typ; int16_t arg; };
+QueueHandle_t     kolejkaAudio;
+SemaphoreHandle_t mutexTytul;
+char              tytulBuf[256] = "";
+volatile bool     nowyTytul = false;
+uint32_t          tPolaczenia = 0;
+
+void wyslijAudio(uint8_t typ, int arg) {
+  PolecenieAudio p = {typ, (int16_t)arg};
+  xQueueSend(kolejkaAudio, &p, 0);
+}
+
+void zadanieAudio(void*) {
+  PolecenieAudio p;
+  for (;;) {
+    int polacz = -1;
+    while (xQueueReceive(kolejkaAudio, &p, 0) == pdTRUE) {
+      switch (p.typ) {
+        case AUDIO_POLACZ:   polacz = p.arg; break;        // liczy się tylko ostatnie
+        case AUDIO_GLOSNOSC: audio.setVolume(p.arg); break;
+        case AUDIO_STOP:     polacz = -1; audio.stopSong(); break;
+      }
+    }
+    if (polacz >= 0) audio.connecttohost(urlStacji(polacz));
+    audio.loop();
+    vTaskDelay(1);
+  }
+}
+
 // Flagi odświeżania ekranu
 bool odswiezStacje = true, odswiezTytul = true, odswiezGlos = true;
 bool odswiezStan = true, odswiezPrzyciski = false, odswiezTresc = false, odswiezListe = false;
+bool nakladkaBrudna = false;    // okienko/podgląd enkodera do przerysowania (rysowane max co 40 ms)
 
-// ---------- Callback biblioteki audio (wywoływany z audio.loop()) ----------
+// ---------- Callback biblioteki audio (wywoływany z zadania audio) ----------
 void my_audio_info(Audio::msg_t m) {
   switch (m.e) {
     case Audio::evt_streamtitle:
-      tytul = m.msg ? m.msg : "";
-      odswiezTytul = true;
+      xSemaphoreTake(mutexTytul, portMAX_DELAY);
+      strlcpy(tytulBuf, m.msg ? m.msg : "", sizeof(tytulBuf));
+      xSemaphoreGive(mutexTytul);
+      nowyTytul = true;
       break;
     case Audio::evt_spectrum:
       ustawWidmo(m.vec1, m.vec2);
@@ -134,7 +170,7 @@ void pokazNakladke() {
   if (trybEnk == TRYB_GLOSNOSC)      { toastPasek(glosnosc, 21, false);   toastWidoczny = true; }
   else if (trybEnk == TRYB_JASNOSC)  { toastPasek(blJasnosc, 255, true);  toastWidoczny = true; }
   else if (wybieranaStacja >= 0) {
-    if (zakladka == Z_LISTA) { listaPokazStacje(wybieranaStacja); rysujListe(stacja, wybieranaStacja); }
+    if (zakladka == Z_LISTA) { listaPokazStacje(wybieranaStacja); odswiezListeOszczednie(stacja, wybieranaStacja); }
     else { toastStacja(wybieranaStacja, liczbaStacji, nazwaStacji(wybieranaStacja)); toastWidoczny = true; }
   }
 }
@@ -159,18 +195,19 @@ void grajStacje(int n) {
   tytul  = "";
   odswiezStacje = odswiezTytul = odswiezStan = odswiezPrzyciski = odswiezTresc = true;
   Serial.printf("Stacja %d: %s\n", stacja + 1, urlStacji(stacja));
-  audio.connecttohost(urlStacji(stacja));
+  tPolaczenia = millis();
+  wyslijAudio(AUDIO_POLACZ, stacja);
 }
 
 void ustawGlosnosc(int v) {
   glosnosc = constrain(v, 0, 21);
-  audio.setVolume(glosnosc);
+  wyslijAudio(AUDIO_GLOSNOSC, glosnosc);
   odswiezGlos = true;
 }
 
 void przelaczPauze() {
   if (pauza) { grajStacje(stacja); return; }       // radio na żywo: wznowienie = ponowne połączenie
-  audio.stopSong();
+  wyslijAudio(AUDIO_STOP, 0);
   pauza = true;
   odswiezPrzyciski = odswiezStan = true;
 }
@@ -185,7 +222,7 @@ void ustawUsypianie(int minuty) {
 void sprawdzUsypianie() {
   if (!usypianieMin || millis() - usypianieStart < usypianieMin * 60000UL) return;
   usypianieMin = 0;
-  audio.stopSong();
+  wyslijAudio(AUDIO_STOP, 0);
   pauza = true;
   jasnoscPrzedSnem = blJasnosc;
   ustawJasnosc(0);
@@ -205,7 +242,7 @@ void ustawTryb(int t) {
   tEnkoder = millis();
   odswiezGlos = true;
   if (trybEnk == TRYB_STACJE) schowajNakladke();
-  else                        pokazNakladke();
+  else                        nakladkaBrudna = true;
 }
 
 // ---------- Dotyk ----------
@@ -250,6 +287,10 @@ void obsluzDotyk() {
   static bool     wcisniety = false, przeciaganie = false, pominKlik = false;
   static int      x0, y0, yOst, xOst, yOstat;
   static uint32_t tOstatni = 0;
+
+  static uint32_t tCzytania = 0;               // odczyt dotyku co 15 ms (oszczędza szynę SPI)
+  if (millis() - tCzytania < 15) return;
+  tCzytania = millis();
 
   int32_t x, y;
   if (tft.getTouch(&x, &y)) {
@@ -301,16 +342,16 @@ void obsluzEnkoder() {
         if (wybieranaStacja < 0) wybieranaStacja = stacja;
         wybieranaStacja = ((wybieranaStacja + k) % liczbaStacji + liczbaStacji) % liczbaStacji;
         tWyboru = millis();
-        pokazNakladke();
+        nakladkaBrudna = true;
         odswiezStan = true;
         break;
       case TRYB_GLOSNOSC:
         ustawGlosnosc(glosnosc + k);
-        pokazNakladke();
+        nakladkaBrudna = true;
         break;
       case TRYB_JASNOSC:
         ustawJasnosc(constrain(blJasnosc + k * 15, 10, 255));
-        pokazNakladke();
+        nakladkaBrudna = true;
         break;
     }
   }
@@ -323,6 +364,7 @@ void obsluzEnkoder() {
     if (s != stacja) grajStacje(s);
     else { odswiezStacje = odswiezStan = odswiezTresc = true; }
     schowajNakladke();
+    if (zakladka == Z_LISTA) odswiezListe = true;     // zdejmij białą ramkę wyboru
   }
 
   switch (p) {
@@ -360,10 +402,20 @@ void obsluzSerial() {
 
 // ---------- Odświeżanie ekranu ----------
 void odswiezEkran() {
-  static uint32_t tStan = 0, tWolne = 0;
+  static uint32_t tStan = 0, tWolne = 0, tNakl = 0;
   bool sekunda = millis() - tStan > 1000;
 
-  if (odswiezStan || sekunda) { odswiezStan = false; tStan = millis(); rysujStan(); }
+  if (nowyTytul) {
+    xSemaphoreTake(mutexTytul, portMAX_DELAY);
+    tytul = tytulBuf;
+    xSemaphoreGive(mutexTytul);
+    nowyTytul = false;
+    odswiezTytul = true;
+  }
+
+  if ((odswiezStan && millis() - tStan > 150) || sekunda) { odswiezStan = false; tStan = millis(); rysujStan(); }
+
+  if (nakladkaBrudna && millis() - tNakl > 40) { nakladkaBrudna = false; tNakl = millis(); pokazNakladke(); }
 
   if (!toastWidoczny) {
     switch (zakladka) {
@@ -380,7 +432,7 @@ void odswiezEkran() {
         break;
       case Z_LISTA:
         if (odswiezTresc) listaPokazStacje(stacja);
-        if (odswiezTresc || odswiezListe) rysujListe(stacja, wybieranaStacja);
+        if (odswiezTresc || odswiezListe) odswiezListeOszczednie(stacja, wybieranaStacja);
         break;
       case Z_ULUBIONE:
         if (odswiezTresc) rysujUlubione(stacja);
@@ -454,12 +506,16 @@ void setup() {
   audio.settings.SPECTRUM = true;     // analizator widma
   audio.settings.VU_LEVEL = true;     // wskaźnik VU
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  ustawGlosnosc(glosnosc);
+  audio.setVolume(glosnosc);
+
+  kolejkaAudio = xQueueCreate(16, sizeof(PolecenieAudio));
+  mutexTytul   = xSemaphoreCreateMutex();
+  xTaskCreatePinnedToCore(zadanieAudio, "audio", 12288, nullptr, 2, nullptr, 0);
+
   grajStacje(0);
 }
 
 void loop() {
-  audio.loop();
 
   obsluzDotyk();
   obsluzEnkoder();
@@ -474,10 +530,10 @@ void loop() {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("Wi-Fi zerwane, lacze ponownie...");
       WiFi.reconnect();
-    } else if (!pauza && !audio.isRunning()) {
+    } else if (!pauza && !audio.isRunning() && millis() - tPolaczenia > 15000) {
       grajStacje(stacja);
     }
   }
 
-  vTaskDelay(1);
+  vTaskDelay(2);
 }

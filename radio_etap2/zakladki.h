@@ -12,10 +12,10 @@ const int SZER_LISTY = 312;
 int listaGora = 0;          // indeks wpisu w pierwszym widocznym wierszu
 
 // Przewiń tak, żeby wpis był widoczny (z nagłówkiem grupy, jeśli się da)
+// Gdy wpis wychodzi poza ekran, lista przeskakuje tak, żeby był na środku
+// (przy kręceniu enkoderem pełne przerysowanie co kilka kroków, nie przy każdym).
 inline void listaPokazWpis(int wpis) {
-  if (wpis < listaGora) listaGora = wpis;
-  else if (wpis >= listaGora + WIERSZY) listaGora = wpis - WIERSZY + 1;
-  if (listaGora > 0 && listaGora == wpis && nrWpisu[listaGora - 1] < 0) listaGora--;
+  if (wpis < listaGora || wpis >= listaGora + WIERSZY) listaGora = wpis - WIERSZY / 2 + 1;
   listaGora = constrain(listaGora, 0, max(0, LICZBA_WPISOW - WIERSZY));
 }
 inline void listaPokazStacje(int n) { if (n >= 0 && n < liczbaStacji) listaPokazWpis(wpisStacji[n]); }
@@ -73,10 +73,30 @@ inline void rysujPasekPrzewijania() {
   tft.fillRect(x, ys, 3, hs, kol::jasnyNieb);
 }
 
+static int listaRysGora = -1, listaRysWyb = -2, listaRysGraj = -2;   // co jest teraz na ekranie
+
 inline void rysujListe(int grajacy, int wybierany) {
   for (int r = 0; r < WIERSZY; r++) rysujWierszListy(r, grajacy, wybierany);
   tft.fillRect(0, Y_LISTY + WIERSZY * H_WIERSZA, E_W, Y_ZAKL - (Y_LISTY + WIERSZY * H_WIERSZA), TFT_BLACK);
   rysujPasekPrzewijania();
+  listaRysGora = listaGora; listaRysWyb = wybierany; listaRysGraj = grajacy;
+}
+
+inline void rysujWierszStacji(int n, int grajacy, int wybierany) {
+  if (n < 0 || n >= liczbaStacji) return;
+  int r = wpisStacji[n] - listaGora;
+  if (r >= 0 && r < WIERSZY) rysujWierszListy(r, grajacy, wybierany);
+}
+
+// Przerysowuje tylko to, co się zmieniło (2 wiersze zamiast całej listy)
+inline void odswiezListeOszczednie(int grajacy, int wybierany) {
+  if (listaGora != listaRysGora || grajacy != listaRysGraj) {
+    rysujListe(grajacy, wybierany);
+  } else if (wybierany != listaRysWyb) {
+    rysujWierszStacji(listaRysWyb, grajacy, wybierany);
+    rysujWierszStacji(wybierany, grajacy, wybierany);
+    listaRysWyb = wybierany;
+  }
 }
 
 // Zwraca nr stacji pod palcem, -1 = nagłówek/puste
@@ -156,7 +176,7 @@ const int VU_X = 6, VU_Y = 24, VU_W = 308, VU_H = 164;
 const int VU_CX = 154, VU_CY = 172, VU_R = 120;     // oś igieł (współrzędne tarczy)
 const int IG_X = 50, IG_Y = 40, IG_W = 208, IG_H = 124;
 static bool  tarczaGotowa = false;
-static float igL = -50, igP = -50;
+static float igla = -50;
 static int   ostatniPeak = -1;
 
 inline void punktVU(float a, float r, float& x, float& y) {
@@ -211,16 +231,10 @@ inline void przygotujTarcze() {
   s.setTextColor(kol::szary);
   s.drawString("VU", VU_CX, 126);
 
-  // Legenda igieł
-  s.fillRect(112, 141, 14, 2, kol::linia);
-  s.fillRect(170, 141, 14, 2, kol::ciemnyCzer);
   s.setFont(&fonts::Font2);
   s.setTextDatum(middle_left);
-  s.setTextColor(kol::linia);      s.drawString("L", 130, 142);
-  s.setTextColor(kol::ciemnyCzer); s.drawString("P", 188, 142);
-
   s.setTextColor(kol::szary);
-  s.drawString("PEAK", 42, 16);
+  s.drawString("PEAK", 32, 16);
   s.setTextDatum(middle_right);
   s.drawString("dB", VU_W - 14, 16);
 
@@ -236,26 +250,21 @@ inline void rysujIgly(bool wymus = false) {
   t0 = millis();
   vuNowe = false;
 
-  igL += (vuNaKat(vuL) - igL) * 0.5f;
-  igP += (vuNaKat(vuP) - igP) * 0.5f;
+  // Jedna igła: średnia z obu kanałów
+  igla += (vuNaKat((vuL + vuP) / 2) - igla) * 0.5f;
 
   sprTarcza.pushSprite(&sprIgly, -IG_X, -IG_Y);     // tło z tarczy
   float px = VU_CX - IG_X, py = VU_CY - IG_Y;
-  auto igla = [&](float a, uint16_t c) {
-    float t = a * DEG_TO_RAD;
-    sprIgly.drawWideLine(px, py, px + (VU_R + 6) * sinf(t), py - (VU_R + 6) * cosf(t), 1.0f, c);
-  };
-  igla(igL, kol::linia);
-  igla(igP, kol::ciemnyCzer);
+  float t  = igla * DEG_TO_RAD;
+  sprIgly.drawWideLine(px, py, px + (VU_R + 6) * sinf(t), py - (VU_R + 6) * cosf(t), 1.0f, kol::linia);
   sprIgly.fillRect(122 - IG_X, 154 - IG_Y, 64, 10, kol::linia);
   sprIgly.pushSprite(VU_X + IG_X, VU_Y + IG_Y);
 
-  // Lampki przesterowania (L, P)
-  int peak = (vuSzczytL > 235 ? 1 : 0) | (vuSzczytP > 235 ? 2 : 0);
+  // Lampka przesterowania
+  int peak = (max(vuSzczytL, vuSzczytP) > 235) ? 1 : 0;
   if (peak != ostatniPeak || wymus) {
     ostatniPeak = peak;
-    tft.fillCircle(VU_X + 16, VU_Y + 16, 4, (peak & 1) ? kol::widmoCzer : kol::bordo);
-    tft.fillCircle(VU_X + 28, VU_Y + 16, 4, (peak & 2) ? kol::widmoCzer : kol::bordo);
+    tft.fillCircle(VU_X + 22, VU_Y + 16, 4, peak ? kol::widmoCzer : kol::bordo);
   }
 }
 
