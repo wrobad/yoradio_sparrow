@@ -17,12 +17,14 @@ Autorskie radio internetowe na ESP32-S3 (w stylu yoRadio).
 | SD_CS (planowane) | 21 |
 | Enkoder CLK / DT / SW (np. KY-040, zasilanie 3V3) | 15 / 16 / 17 |
 | IR (planowane) | 18 |
-| Ekran 2 (2.25" ST7789 76x284, SPI3): SCL / SDA / RST / DC / CS / BL | 41 / 42 / 39 / 40 / 38 / 47 |
+| Ekran 2 (2.25" ST7789 76x284, SPI3): SCL / SDA / RST / DC / CS / BL | 41 / 42 / 39 / 40 / 38 / 47 (BL świeci stanem niskim) |
+| Enkoder 2 – głośność: S1 / S2 / KEY (zasilanie 3V3) | 35 / 36 / 37 |
 
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice
-- **`radio_etap2/` – aktualna wersja.** Ekran z 6 zakładkami: Radio, Lista stacji (z grupami, przewijana palcem), Ulubione (6 kafelków), Wskaźnik VU (analogowa tarcza z dwiema igłami L/P), Zegar (duża godzina i data), Ustawienia (informacje, suwak jasności, wyłącznik czasowy 15/30/60 min). Zakładki zmienia się ikonami na dole ekranu albo podwójnym kliknięciem enkodera.
+- **`radio_etap3/` – aktualna wersja.** Dwa ekrany i dwa enkodery. Ekran główny: 8 zakładek (Radio, Lista, Ulubione, **Skala** radiowa grupy z płynną wskazówką, **Korektor** 10-pasmowy 31 Hz–16 kHz z ustawieniami Płasko/Rock/Pop/Jazz/Bas+, VU, Zegar, Ustawienia). Ekran 2 (2.25" 76x284): analizator widma w stylu Technics. Korektor działa na dźwięku i zapisuje się w pamięci. Enkoder 2 (piny 35/36/37) = głośność, klik = wyciszenie, podwójny = poprzednia zakładka, długi = Korektor.
+- `radio_etap2/` – poprzednia wersja: Ekran z 6 zakładkami: Radio, Lista stacji (z grupami, przewijana palcem), Ulubione (6 kafelków), Wskaźnik VU (analogowa tarcza z dwiema igłami L/P), Zegar (duża godzina i data), Ustawienia (informacje, suwak jasności, wyłącznik czasowy 15/30/60 min). Zakładki zmienia się ikonami na dole ekranu albo podwójnym kliknięciem enkodera.
 - `test_ekranu_2/` – test drugiego, podłużnego ekranu 2.25" 76x284 (ST7789) na SPI3: ramka na krawędziach, korekta przesunięcia z Serial Monitora
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
 - `radio_etap1/` – radio: Wi-Fi, odtwarzanie strumienia, ekran z paskiem stanu (zegar NTP, format/bitrate, numer stacji, sygnał Wi-Fi), nazwą stacji, przewijanym tytułem, analizatorem widma (15 pasm), paskiem głośności/jasności i przyciskami dotykowymi (`ekran.h`); podświetlenie PWM na GPIO 8 (`podswietlenie.h`); enkoder (`enkoder.h`): obrót = wybór stacji, klik = tryb głośności, długie naciśnięcie = tryb jasności
