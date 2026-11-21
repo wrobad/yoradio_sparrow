@@ -34,7 +34,8 @@
 #define WERSJA "v0.5"
 const char* STREFA_CZASU = "CET-1CEST,M3.5.0,M10.5.0/3";   // czas polski
 
-const uint32_t OPOZNIENIE_WYBORU = 700;    // ms bez kręcenia -> włącz wybraną stację
+const uint32_t OPOZNIENIE_WYBORU       = 700;    // ms bez kręcenia -> włącz wybraną stację
+const uint32_t OPOZNIENIE_WYBORU_LISTA = 3000;   // to samo w zakładce Lista (czas na przeczytanie)
 const uint32_t POWROT_TRYBU      = 5000;   // ms bez kręcenia -> powrót do wyboru stacji
 
 // I2S -> PCM5102
@@ -315,7 +316,8 @@ void obsluzEnkoder() {
   }
 
   // Zatwierdzenie wybranej stacji
-  if (wybieranaStacja >= 0 && millis() - tWyboru > OPOZNIENIE_WYBORU) {
+  uint32_t opoznienie = (zakladka == Z_LISTA) ? OPOZNIENIE_WYBORU_LISTA : OPOZNIENIE_WYBORU;
+  if (wybieranaStacja >= 0 && millis() - tWyboru > opoznienie) {
     int s = wybieranaStacja;
     wybieranaStacja = -1;
     if (s != stacja) grajStacje(s);
