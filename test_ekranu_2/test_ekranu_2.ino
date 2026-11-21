@@ -5,7 +5,7 @@
 //   GND -> GND      VCC -> 3.3
 //   SCL -> 41       SDA -> 42
 //   RST -> 39       DC  -> 40
-//   CS  -> 38       BL  -> 47
+//   CS  -> 38       BL  -> 47  (świeci przy stanie NISKIM)
 //
 // Co powinno być widać: biała ramka dokładnie na krawędziach ekranu,
 // w rogach kolorowe kwadraty (lewy górny CZERWONY, prawy górny ZIELONY,
@@ -26,6 +26,7 @@
 #define P2_DC   40
 #define P2_CS   38
 #define P2_BL   47
+#define BL_WLACZ LOW    // ten moduł (tranzystor PNP "2TY") świeci przy stanie NISKIM
 
 int  offX = 82, offY = 18;      // typowe wartości dla 76x284
 bool odwroc = true, zamienRGB = false;
@@ -108,8 +109,8 @@ void setup() {
   delay(1500);                 // czas na otwarcie Serial Monitora
   Serial.println("\n=== Test ekranu 2.25\" 76x284 ===");
   pinMode(P2_BL, OUTPUT);
-  digitalWrite(P2_BL, HIGH);   // podświetlenie
-  Serial.println("Podswietlenie (BL, GPIO 47) wlaczone");
+  digitalWrite(P2_BL, BL_WLACZ);   // podświetlenie
+  Serial.println("Podswietlenie (BL, GPIO 47) wlaczone stanem niskim");
 
   bool ok = ekran2.init();
   Serial.printf("init(): %s\n", ok ? "OK" : "BLAD");
