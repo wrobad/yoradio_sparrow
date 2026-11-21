@@ -21,6 +21,7 @@ Autorskie radio internetowe na ESP32-S3 (w stylu yoRadio).
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice
+- **`radio_etap2/` – aktualna wersja.** Ekran z 6 zakładkami: Radio, Lista stacji (z grupami, przewijana palcem), Ulubione (6 kafelków), Wskaźnik VU (analogowa tarcza z dwiema igłami L/P), Zegar (duża godzina i data), Ustawienia (informacje, suwak jasności, wyłącznik czasowy 15/30/60 min). Zakładki zmienia się ikonami na dole ekranu albo podwójnym kliknięciem enkodera.
 - `test_wyswietlacza/` – test wyświetlacza i kalibracja dotyku
 - `radio_etap1/` – radio: Wi-Fi, odtwarzanie strumienia, ekran z paskiem stanu (zegar NTP, format/bitrate, numer stacji, sygnał Wi-Fi), nazwą stacji, przewijanym tytułem, analizatorem widma (15 pasm), paskiem głośności/jasności i przyciskami dotykowymi (`ekran.h`); podświetlenie PWM na GPIO 8 (`podswietlenie.h`); enkoder (`enkoder.h`): obrót = wybór stacji, klik = tryb głośności, długie naciśnięcie = tryb jasności
 
@@ -31,6 +32,7 @@ Plik `sekrety.h` jest w `.gitignore`, więc hasło nigdy nie trafi do repozytori
 ## Lista stacji
 Stacje dopisujesz w pliku **`stacje.h`** w folderze `radio_etap1` (na start skopiuj `stacje_przyklad.h` jako `stacje.h`).
 Jedna linia = jedna stacja: `{"Nazwa", "http://adres.strumienia"},`
+W `radio_etap2` dodatkowo: `GRUPA("Nazwa grupy"),` tworzy nagłówek na liście, a `ULUBIONE` (numery stacji) wybiera 6 kafelków w zakładce Ulubione.
 Plik `stacje.h` jest w `.gitignore`, więc aktualizacje z GitHuba go nie nadpiszą. Bez niego radio użyje listy przykładowej.
 
 ## Kalibracja dotyku
