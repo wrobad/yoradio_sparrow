@@ -39,7 +39,7 @@ public:
     auto b = _bus.config();
     b.spi_host    = SPI3_HOST;
     b.spi_mode    = 0;
-    b.freq_write  = 40000000;
+    b.freq_write  = 20000000;      // wolniej = bezpieczniej na przewodach
     b.freq_read   = 16000000;
     b.spi_3wire   = true;
     b.use_lock    = true;
@@ -105,10 +105,26 @@ void zastosuj() {
 
 void setup() {
   Serial.begin(115200);
-  delay(300);
+  delay(1500);                 // czas na otwarcie Serial Monitora
+  Serial.println("\n=== Test ekranu 2.25\" 76x284 ===");
   pinMode(P2_BL, OUTPUT);
   digitalWrite(P2_BL, HIGH);   // podświetlenie
-  zastosuj();
+  Serial.println("Podswietlenie (BL, GPIO 47) wlaczone");
+
+  bool ok = ekran2.init();
+  Serial.printf("init(): %s\n", ok ? "OK" : "BLAD");
+  ekran2.setRotation(1);
+
+  // Miganie całego ekranu - widać, że żyje, nawet przy złym przesunięciu
+  const uint16_t kolory[] = {TFT_RED, TFT_GREEN, TFT_BLUE, TFT_WHITE, TFT_BLACK};
+  const char* nazwy[]     = {"CZERWONY", "ZIELONY", "NIEBIESKI", "BIALY", "CZARNY"};
+  for (int i = 0; i < 5; i++) {
+    Serial.printf("Caly ekran: %s\n", nazwy[i]);
+    ekran2.fillScreen(kolory[i]);
+    delay(800);
+  }
+  rysujTest();
+  Serial.println("Gotowe - teraz powinna byc ramka i napis.");
 }
 
 void loop() {
