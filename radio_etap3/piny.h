@@ -32,9 +32,10 @@
 #define P2_SCK        36     // SCL
 
 // ---------- Dźwięk: PCM5102 (I2S) ----------
-#define I2S_BCLK       7     // BCK
-#define I2S_DOUT      15     // DATA
-#define I2S_LRC       14     // LRCK
+// 3 kolejne piny prawej listwy: 4 5 6  (BCK DATA LRCK)
+#define I2S_BCLK       4     // BCK
+#define I2S_DOUT       5     // DATA
+#define I2S_LRC        6     // LRCK
 
 // ---------- Enkoder 1 - strojenie ----------
 // 3 kolejne piny lewej listwy: 42 2 1  (KEY S2 S1)
@@ -43,12 +44,14 @@
 #define ENC1_SW       42     // KEY / SW
 
 // ---------- Enkoder 2 - głośność ----------
-// 3 kolejne piny prawej listwy: 4 5 6  (KEY S2 S1)
-#define ENC2_A         6     // S1 / CLK
-#define ENC2_B         5     // S2 / DT
-#define ENC2_SW        4     // KEY / SW
+// 3 kolejne piny lewej listwy: 19 20 21  (S1 S2 KEY)
+// UWAGA: 19 i 20 to linie natywnego USB płytki. Działa, gdy programujesz i używasz
+// Serial Monitora przez gniazdo USB-C z konwerterem (COM/UART), a nie przez natywne USB.
+#define ENC2_A        19     // S1 / CLK
+#define ENC2_B        20     // S2 / DT
+#define ENC2_SW       21     // KEY / SW
 
 // ---------- Wolne ----------
-// 35 (np. CS drugiego podłużnego ekranu), 21, 47
+// 7, 14, 15, 35, 47  (np. 35 = CS drugiego podłużnego ekranu, reszta: pilot IR, czujnik światła)
 //
-// Nie używać: 0, 45 (piny startowe), 19, 20 (USB), 43, 44 (Serial), 48 (dioda RGB na płytce)
+// Nie używać: 0, 45 (piny startowe), 43, 44 (Serial / programowanie), 48 (dioda RGB na płytce)
