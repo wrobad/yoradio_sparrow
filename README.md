@@ -8,11 +8,11 @@ Autorskie radio internetowe na ESP32-S3 (w stylu yoRadio).
 - Wyświetlacz 2.8" TFT 240x320 ILI9341 z dotykiem XPT2046 i slotem SD
 
 ## Połączenia (radio_etap3 – wszystkie piny w `radio_etap3/piny.h`)
-Ekran główny podłączony **taśmą 12 żył** do kolejnych pinów prawej listwy (VCC i GND osobno):
+Ekran główny podłączony **taśmą 11 żył** do kolejnych pinów prawej listwy (VCC i GND osobno, T_IRQ niepodłączony):
 
-| Ekran | CS | RESET | DC | SDI(MOSI) | SCK | LED | SDO(MISO) | T_CLK | T_CS | T_DIN | T_DO | T_IRQ |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GPIO | 16 | 17 | 18 | 8 | 3 | 46 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Ekran | CS | RESET | DC | SDI(MOSI) | SCK | LED | SDO(MISO) | T_CLK | T_CS | T_DIN | T_DO |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| GPIO | 16 | 17 | 18 | 8 | 3 | 46 | 9 | 10 | 11 | 12 | 13 |
 
 | Funkcja | GPIO |
 |---|---|
@@ -20,7 +20,7 @@ Ekran główny podłączony **taśmą 12 żył** do kolejnych pinów prawej list
 | Ekran 2 (2.25" ST7789 76x284, SPI3): SCL / SDA / RST / DC / CS / BL | 41 / 42 / 39 / 40 / 38 / 47 (BL świeci stanem niskim) |
 | Enkoder 1 – strojenie: S1 / S2 / KEY | 2 / 1 / 21 |
 | Enkoder 2 – głośność: S1 / S2 / KEY | 35 / 36 / 37 |
-| Wolne | 4, 15 |
+| Wolne | 4, 14, 15 |
 
 Dotyk działa przez programowe SPI na własnych pinach – wymaga LovyanGFX 1.3.0 lub nowszej.
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.

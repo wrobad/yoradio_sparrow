@@ -4,11 +4,11 @@
 // =====================================================================
 #pragma once
 
-// ---------- Ekran główny 2.8" ILI9341 z dotykiem - TAŚMA 12 żył ----------
-// Taśma wpięta w 12 kolejnych pinów prawej listwy: 16 17 18 8 3 46 9 10 11 12 13 14
-// (VCC -> 3.3, GND -> GND osobnymi przewodami)
-//   pin ekranu:  CS  RESET DC  SDI(MOSI) SCK  LED  SDO(MISO) T_CLK T_CS T_DIN T_DO T_IRQ
-//   GPIO:        16  17    18  8         3    46   9         10    11   12    13   14
+// ---------- Ekran główny 2.8" ILI9341 z dotykiem - TAŚMA 11 żył ----------
+// Taśma wpięta w 11 kolejnych pinów prawej listwy: 16 17 18 8 3 46 9 10 11 12 13
+// (VCC -> 3.3, GND -> GND osobnymi przewodami, T_IRQ niepodłączony)
+//   pin ekranu:  CS  RESET DC  SDI(MOSI) SCK  LED  SDO(MISO) T_CLK T_CS T_DIN T_DO
+//   GPIO:        16  17    18  8         3    46   9         10    11   12    13
 #define PIN_TFT_CS    16
 #define PIN_TFT_RST   17
 #define PIN_TFT_DC    18
@@ -21,7 +21,6 @@
 #define PIN_T_CS      11
 #define PIN_T_DIN     12
 #define PIN_T_DO      13
-#define PIN_T_IRQ     14     // nieużywany
 
 // ---------- Ekran 2: podłużny 2.25" 76x284 ST7789 ----------
 #define P2_SCK        41     // SCL
@@ -47,6 +46,6 @@
 #define ENC2_SW       37     // KEY / SW
 
 // ---------- Wolne ----------
-// 4, 15  (np. odbiornik IR, czujnik światła)
+// 4, 14, 15  (np. odbiornik IR, czujnik światła)
 //
 // Nie używać: 0, 45 (piny startowe), 19, 20 (USB), 43, 44 (Serial), 48 (dioda RGB na płytce)
