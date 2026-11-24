@@ -23,6 +23,7 @@
 #include "skala.h"
 #include "korektor.h"
 #include "analizator.h"
+#include "dioda.h"
 
 #if __has_include("sekrety.h")
   #include "sekrety.h"
@@ -36,7 +37,7 @@
   #include "kalibracja_przyklad.h"
 #endif
 
-#define WERSJA "v0.8"
+#define WERSJA "v0.9"
 const char* STREFA_CZASU = "CET-1CEST,M3.5.0,M10.5.0/3";   // czas polski
 
 const uint32_t OPOZNIENIE_WYBORU       = 700;    // ms bez kręcenia -> włącz wybraną stację
@@ -488,6 +489,20 @@ void obsluzSerial() {
   if (c == 'm') przelaczWyciszenie();
 }
 
+// ---------- Dioda RGB: wskaźnik stanu ----------
+void aktualizujDiode() {
+  static uint32_t t0 = 0;
+  if (millis() - t0 < 100) return;
+  t0 = millis();
+  if (uspiony)                              diodaPokaz(D_USPIONE);
+  else if (WiFi.status() != WL_CONNECTED)   diodaPokaz(D_BRAK_WIFI);
+  else if (pauza)                           diodaPokaz(D_PAUZA);
+  else if (wyciszony)                       diodaPokaz(D_WYCISZONE);
+  else if (!audio.isRunning())              diodaPokaz(millis() - tPolaczenia < 15000 ? D_LACZENIE : D_BLAD_STACJI);
+  else if (buforProcent() < 15)             diodaPokaz(D_SLABY_BUFOR);
+  else                                      diodaPokaz(D_GRA);
+}
+
 // ---------- Odświeżanie ekranów ----------
 void odswiezEkran() {
   static uint32_t tStan = 0, tWolne = 0, tNakl = 0;
@@ -593,7 +608,7 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED) { klatkaStartowa(); delay(40); }
+  while (WiFi.status() != WL_CONNECTED) { klatkaStartowa(); diodaPokaz(D_LACZENIE); delay(40); }
   Serial.printf("Wi-Fi OK, IP: %s\n", WiFi.localIP().toString().c_str());
   napisStartowy("Wi-Fi OK  " + WiFi.localIP().toString());
   while (millis() - tStart < 2500) { klatkaStartowa(); delay(40); }
@@ -625,6 +640,7 @@ void loop() {
   obsluzSerial();
   sprawdzUsypianie();
   eqZapiszJesliTrzeba();
+  aktualizujDiode();
   odswiezEkran();
 
   // Ponowne łączenie po zerwaniu Wi-Fi lub strumienia

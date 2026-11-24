@@ -23,11 +23,12 @@
 #define PIN_T_DO      13
 
 // ---------- Ekran 2: podłużny 2.25" 76x284 ST7789 ----------
-// 6 kolejnych pinów lewej listwy: 41 40 39 38 37 36  (BL CS DC RST SDA SCL)
+// Lewa listwa: BL 41, CS 40, DC 39, SDA 37, SCL 36, RST 35
+// (RST przeniesiony z 38 na 35 - pin 38 steruje diodą RGB na płytce)
 #define P2_BL         41     // świeci stanem NISKIM (tranzystor PNP na module)
 #define P2_CS         40
 #define P2_DC         39
-#define P2_RST        38
+#define P2_RST        35
 #define P2_MOSI       37     // SDA
 #define P2_SCK        36     // SCL
 
@@ -51,7 +52,10 @@
 #define ENC2_B        20     // S2 / DT
 #define ENC2_SW       21     // KEY / SW
 
+// ---------- Dioda RGB na płytce (WS2812) - wskaźnik stanu radia ----------
+#define PIN_RGB       38
+
 // ---------- Wolne ----------
-// 7, 14, 15, 35, 47  (np. 35 = CS drugiego podłużnego ekranu, reszta: pilot IR, czujnik światła)
+// 7, 14, 15, 47  (np. CS drugiego podłużnego ekranu, pilot IR, czujnik światła)
 //
 // Nie używać: 0, 45 (piny startowe), 43, 44 (Serial / programowanie), 48 (dioda RGB na płytce)

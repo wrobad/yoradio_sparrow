@@ -16,11 +16,14 @@ Ekran główny podłączony **taśmą 11 żył** do kolejnych pinów prawej list
 
 | Funkcja | GPIO |
 |---|---|
-| Ekran 2 (2.25" ST7789 76x284, SPI3): BL / CS / DC / RST / SDA / SCL | 41 / 40 / 39 / 38 / 37 / 36 (BL świeci stanem niskim) |
+| Ekran 2 (2.25" ST7789 76x284, SPI3): BL / CS / DC / RST / SDA / SCL | 41 / 40 / 39 / 35 / 37 / 36 (BL świeci stanem niskim) |
+| Dioda RGB na płytce – wskaźnik stanu | 38 |
 | PCM5102: BCK / DATA / LRCK | 4 / 5 / 6 |
 | Enkoder 1 – strojenie: KEY / S2 / S1 | 42 / 2 / 1 |
 | Enkoder 2 – głośność: S1 / S2 / KEY | 19 / 20 / 21 (piny natywnego USB – programowanie przez gniazdo COM/UART) |
-| Wolne | 7, 14, 15, 35, 47 |
+| Wolne | 7, 14, 15, 47 |
+
+**Dioda RGB na płytce** pokazuje stan radia: zielona – gra, żółta – mało danych w buforze, żółta migająca – łączenie, czerwona – brak Wi-Fi, czerwona migająca – stacja nie odpowiada, niebieska – pauza, fioletowa – wyciszone, zgaszona – uśpione.
 
 Dotyk działa przez programowe SPI na własnych pinach – wymaga LovyanGFX 1.3.0 lub nowszej.
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
