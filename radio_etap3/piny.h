@@ -24,7 +24,7 @@
 
 // ---------- Ekran 2: podłużny 2.25" 76x284 ST7789 ----------
 #define P2_SCK        41     // SCL
-#define P2_MOSI       42     // SDA
+#define P2_MOSI       21     // SDA
 #define P2_RST        39
 #define P2_DC         40
 #define P2_CS         38
@@ -36,11 +36,13 @@
 #define I2S_DOUT       7     // DATA
 
 // ---------- Enkoder 1 - strojenie ----------
-#define ENC1_A         2     // S1 / CLK
-#define ENC1_B         1     // S2 / DT
-#define ENC1_SW       21     // KEY / SW
+// 3 kolejne piny lewej listwy: 42 2 1  (KEY S2 S1)
+#define ENC1_A         1     // S1 / CLK
+#define ENC1_B         2     // S2 / DT
+#define ENC1_SW       42     // KEY / SW
 
 // ---------- Enkoder 2 - głośność ----------
+// 3 kolejne piny lewej listwy: 35 36 37  (S1 S2 KEY)
 #define ENC2_A        35     // S1 / CLK
 #define ENC2_B        36     // S2 / DT
 #define ENC2_SW       37     // KEY / SW
