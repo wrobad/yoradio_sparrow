@@ -23,17 +23,18 @@
 #define PIN_T_DO      13
 
 // ---------- Ekran 2: podłużny 2.25" 76x284 ST7789 ----------
-#define P2_SCK        41     // SCL
-#define P2_MOSI       21     // SDA
-#define P2_RST        39
-#define P2_DC         40
-#define P2_CS         38
-#define P2_BL         47     // świeci stanem NISKIM (tranzystor PNP na module)
+// 6 kolejnych pinów lewej listwy: 41 40 39 38 37 36  (BL CS DC RST SDA SCL)
+#define P2_BL         41     // świeci stanem NISKIM (tranzystor PNP na module)
+#define P2_CS         40
+#define P2_DC         39
+#define P2_RST        38
+#define P2_MOSI       37     // SDA
+#define P2_SCK        36     // SCL
 
 // ---------- Dźwięk: PCM5102 (I2S) ----------
-#define I2S_BCLK       5     // BCK
-#define I2S_LRC        6     // LRCK
-#define I2S_DOUT       7     // DATA
+#define I2S_BCLK       7     // BCK
+#define I2S_DOUT      15     // DATA
+#define I2S_LRC       14     // LRCK
 
 // ---------- Enkoder 1 - strojenie ----------
 // 3 kolejne piny lewej listwy: 42 2 1  (KEY S2 S1)
@@ -42,12 +43,12 @@
 #define ENC1_SW       42     // KEY / SW
 
 // ---------- Enkoder 2 - głośność ----------
-// 3 kolejne piny lewej listwy: 35 36 37  (S1 S2 KEY)
-#define ENC2_A        35     // S1 / CLK
-#define ENC2_B        36     // S2 / DT
-#define ENC2_SW       37     // KEY / SW
+// 3 kolejne piny prawej listwy: 4 5 6  (KEY S2 S1)
+#define ENC2_A         6     // S1 / CLK
+#define ENC2_B         5     // S2 / DT
+#define ENC2_SW        4     // KEY / SW
 
 // ---------- Wolne ----------
-// 4, 14, 15  (np. odbiornik IR, czujnik światła)
+// 35 (np. CS drugiego podłużnego ekranu), 21, 47
 //
 // Nie używać: 0, 45 (piny startowe), 19, 20 (USB), 43, 44 (Serial), 48 (dioda RGB na płytce)

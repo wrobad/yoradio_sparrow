@@ -16,11 +16,11 @@ Ekran główny podłączony **taśmą 11 żył** do kolejnych pinów prawej list
 
 | Funkcja | GPIO |
 |---|---|
-| I2S BCK / LRCK / DATA (PCM5102) | 5 / 6 / 7 |
-| Ekran 2 (2.25" ST7789 76x284, SPI3): SCL / SDA / RST / DC / CS / BL | 41 / 21 / 39 / 40 / 38 / 47 (BL świeci stanem niskim) |
+| Ekran 2 (2.25" ST7789 76x284, SPI3): BL / CS / DC / RST / SDA / SCL | 41 / 40 / 39 / 38 / 37 / 36 (BL świeci stanem niskim) |
+| PCM5102: BCK / DATA / LRCK | 7 / 15 / 14 |
 | Enkoder 1 – strojenie: KEY / S2 / S1 | 42 / 2 / 1 |
-| Enkoder 2 – głośność: S1 / S2 / KEY | 35 / 36 / 37 |
-| Wolne | 4, 14, 15 |
+| Enkoder 2 – głośność: KEY / S2 / S1 | 4 / 5 / 6 |
+| Wolne | 35, 21, 47 |
 
 Dotyk działa przez programowe SPI na własnych pinach – wymaga LovyanGFX 1.3.0 lub nowszej.
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
