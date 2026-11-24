@@ -2,14 +2,7 @@
 #pragma once
 #include <LovyanGFX.hpp>
 
-#define PIN_SCK      12
-#define PIN_MOSI     11
-#define PIN_MISO     13
-#define PIN_TFT_CS   10
-#define PIN_TFT_DC    9
-#define PIN_TFT_RST  14
-#define PIN_TFT_BL    8
-#define PIN_TOUCH_CS  4
+#include "piny.h"        // wszystkie piny są w piny.h
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_ILI9341 _panel;
@@ -22,8 +15,8 @@ public:
       auto cfg = _bus.config();
       cfg.spi_host    = SPI2_HOST;
       cfg.spi_mode    = 0;
-      cfg.freq_write  = 40000000;
-      cfg.freq_read   = 16000000;
+      cfg.freq_write  = 27000000;   // piny przez matrycę GPIO; przy zakłóceniach obrazu -> 20000000
+      cfg.freq_read   = 10000000;
       cfg.spi_3wire   = false;
       cfg.use_lock    = true;
       cfg.dma_channel = SPI_DMA_CH_AUTO;
@@ -45,7 +38,7 @@ public:
       cfg.invert     = false;  // jeśli w teście kolory były w negatywie → true
       cfg.rgb_order  = false;  // jeśli czerwony/niebieski zamienione → true
       cfg.dlen_16bit = false;
-      cfg.bus_shared = true;
+      cfg.bus_shared = false;
       _panel.config(cfg);
     }
     // Podświetlenie NIE jest sterowane przez LovyanGFX (Light_PWM nie działa
@@ -55,13 +48,13 @@ public:
       cfg.x_min = 0;  cfg.x_max = 239;
       cfg.y_min = 0;  cfg.y_max = 319;
       cfg.pin_int    = -1;
-      cfg.bus_shared = true;
-      cfg.spi_host   = SPI2_HOST;
+      cfg.bus_shared = false;
+      cfg.spi_host   = -1;          // programowe SPI na własnych pinach (LovyanGFX 1.3.0+)
       cfg.freq       = 1000000;
-      cfg.pin_sclk = PIN_SCK;
-      cfg.pin_mosi = PIN_MOSI;
-      cfg.pin_miso = PIN_MISO;
-      cfg.pin_cs   = PIN_TOUCH_CS;
+      cfg.pin_sclk = PIN_T_CLK;
+      cfg.pin_mosi = PIN_T_DIN;
+      cfg.pin_miso = PIN_T_DO;
+      cfg.pin_cs   = PIN_T_CS;
       _touch.config(cfg);
       _panel.setTouch(&_touch);
     }
@@ -73,12 +66,7 @@ public:
 // Ekran 2: podłużny 2.25" 76x284 (ST7789P3) na drugiej szynie SPI (SPI3)
 // Ustawienia sprawdzone szkicem test_ekranu_2: przesunięcie 82/18, bez inwersji.
 // =====================================================================
-#define P2_SCK  41
-#define P2_MOSI 42
-#define P2_RST  39
-#define P2_DC   40
-#define P2_CS   38
-#define P2_BL   47     // podświetlenie świeci przy stanie NISKIM (PNP na module)
+// Piny ekranu 2: P2_... w piny.h
 
 class LGFX_Pasek : public lgfx::LGFX_Device {
   lgfx::Panel_ST7789 _panel;

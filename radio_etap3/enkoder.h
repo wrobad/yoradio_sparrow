@@ -5,14 +5,7 @@
 #pragma once
 #include <Arduino.h>
 
-// Enkoder 1 - strojenie (prawy)
-#define ENC1_A   15   // CLK / S1
-#define ENC1_B   16   // DT  / S2
-#define ENC1_SW  17   // SW  / KEY
-// Enkoder 2 - głośność (lewy)
-#define ENC2_A   35
-#define ENC2_B   36
-#define ENC2_SW  37
+#include "piny.h"        // piny enkoderów: ENC1_..., ENC2_... w piny.h
 
 #define ENC_KROKI       4     // impulsów na jedno "kliknięcie" (jeśli skacze o 2 → ustaw 2)
 #define ENC1_KIERUNEK   1     // jeśli kręci odwrotnie → -1

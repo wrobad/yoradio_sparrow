@@ -7,19 +7,22 @@ Autorskie radio internetowe na ESP32-S3 (w stylu yoRadio).
 - PCM5102 (moduł PCM5102MK 2.0) – wyjście audio I2S
 - Wyświetlacz 2.8" TFT 240x320 ILI9341 z dotykiem XPT2046 i slotem SD
 
-## Połączenia
+## Połączenia (radio_etap3 – wszystkie piny w `radio_etap3/piny.h`)
+Ekran główny podłączony **taśmą 12 żył** do kolejnych pinów prawej listwy (VCC i GND osobno):
+
+| Ekran | CS | RESET | DC | SDI(MOSI) | SCK | LED | SDO(MISO) | T_CLK | T_CS | T_DIN | T_DO | T_IRQ |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GPIO | 16 | 17 | 18 | 8 | 3 | 46 | 9 | 10 | 11 | 12 | 13 | 14 |
+
 | Funkcja | GPIO |
 |---|---|
-| I2S BCK / LRCK / DATA | 5 / 6 / 7 |
-| SPI MOSI / SCK / MISO (TFT, dotyk, SD) | 11 / 12 / 13 |
-| TFT CS / DC / RESET / LED | 10 / 9 / 14 / 8 |
-| Dotyk T_CS | 4 |
-| SD_CS (planowane) | 21 |
-| Enkoder CLK / DT / SW (np. KY-040, zasilanie 3V3) | 15 / 16 / 17 |
-| IR (planowane) | 18 |
+| I2S BCK / LRCK / DATA (PCM5102) | 5 / 6 / 7 |
 | Ekran 2 (2.25" ST7789 76x284, SPI3): SCL / SDA / RST / DC / CS / BL | 41 / 42 / 39 / 40 / 38 / 47 (BL świeci stanem niskim) |
-| Enkoder 2 – głośność: S1 / S2 / KEY (zasilanie 3V3) | 35 / 36 / 37 |
+| Enkoder 1 – strojenie: S1 / S2 / KEY | 2 / 1 / 21 |
+| Enkoder 2 – głośność: S1 / S2 / KEY | 35 / 36 / 37 |
+| Wolne | 4, 15 |
 
+Dotyk działa przez programowe SPI na własnych pinach – wymaga LovyanGFX 1.3.0 lub nowszej.
 PCM5102 zasilany z 5V, wyświetlacz z 3V3.
 
 ## Szkice

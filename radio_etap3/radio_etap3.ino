@@ -13,6 +13,7 @@
 #include <WiFi.h>
 #include <time.h>
 #include "Audio.h"
+#include "piny.h"
 #include "lgfx_config.h"
 #include "podswietlenie.h"
 #include "enkoder.h"
@@ -35,7 +36,7 @@
   #include "kalibracja_przyklad.h"
 #endif
 
-#define WERSJA "v0.7"
+#define WERSJA "v0.8"
 const char* STREFA_CZASU = "CET-1CEST,M3.5.0,M10.5.0/3";   // czas polski
 
 const uint32_t OPOZNIENIE_WYBORU       = 700;    // ms bez kręcenia -> włącz wybraną stację
@@ -43,10 +44,7 @@ const uint32_t OPOZNIENIE_WYBORU_LISTA = 3000;   // w zakładkach Lista i Skala 
 const uint32_t POWROT_TRYBU            = 5000;   // ms bez kręcenia -> powrót do wyboru stacji
 const uint32_t CZAS_OKIENKA            = 1500;   // jak długo widać okienko głośności z enkodera 2
 
-// I2S -> PCM5102
-#define I2S_BCLK 5
-#define I2S_LRC  6
-#define I2S_DOUT 7
+// Piny (I2S, ekrany, enkodery): piny.h
 
 Audio      audio;
 LGFX       tft;
